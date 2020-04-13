@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro/constants.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 void main() {
@@ -14,7 +15,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         // This is the theme of your application.
         primaryColor: Colors.red,
+        primaryColorDark: Colors.red,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        buttonTheme: ButtonThemeData(buttonColor: Colors.red),
       ),
       home: TimerPage(),
     );
@@ -27,6 +30,14 @@ class TimerPage extends StatefulWidget {
 }
 
 class _TimerPageState extends State<TimerPage> {
+  int currentTimeMinutes;
+  void updateTime(double time) {
+    setState(() {
+      currentTimeMinutes = time.floor().toInt();
+      print(currentTimeMinutes);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,14 +47,36 @@ class _TimerPageState extends State<TimerPage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [TimeSlider()],
+          children: [
+            TimeSelectionSlider(
+              updateTime: updateTime,
+            ),
+            ButtonBar(
+              alignment: MainAxisAlignment.center,
+              children: [
+                RaisedButton(
+                  child: Icon(Icons.play_arrow),
+                  onPressed: () {
+                    print('button pressed');
+                  },
+                ),
+                RaisedButton(
+                  child: Icon(Icons.stop),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class TimeSlider extends StatelessWidget {
+class TimeSelectionSlider extends StatelessWidget {
+  TimeSelectionSlider({this.updateTime});
+  final Function updateTime;
+
   @override
   Widget build(BuildContext context) {
     return SleekCircularSlider(
@@ -72,7 +105,7 @@ class TimeSlider extends StatelessWidget {
         ),
       ),
       onChange: (value) {
-        print(value.toString());
+        updateTime(value);
       },
     );
   }
