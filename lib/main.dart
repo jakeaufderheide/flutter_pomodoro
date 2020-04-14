@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/constants.dart';
+import 'package:flutter_pomodoro/time_selection_slider.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 void main() {
@@ -48,8 +49,22 @@ class _TimerPageState extends State<TimerPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TimeSelectionSlider(
-              updateTime: updateTime,
+            Stack(
+              alignment: AlignmentDirectional.center,
+              children: [
+                TimeSelectionSlider(
+                  valueChanged: updateTime,
+                ),
+                Column(
+                  children: <Widget>[
+                    Text(
+                      currentTimeMinutes.toString(),
+                      style: kMinuteTextStyle,
+                    ),
+                    Text('minutes'),
+                  ],
+                ),
+              ],
             ),
             ButtonBar(
               alignment: MainAxisAlignment.center,
@@ -69,44 +84,6 @@ class _TimerPageState extends State<TimerPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class TimeSelectionSlider extends StatelessWidget {
-  TimeSelectionSlider({this.updateTime});
-  final Function updateTime;
-
-  @override
-  Widget build(BuildContext context) {
-    return SleekCircularSlider(
-      min: 5,
-      max: 60,
-      initialValue: 25,
-      appearance: CircularSliderAppearance(
-        size: 250.0,
-        customColors: CustomSliderColors(
-          trackColor: Colors.red[200],
-          progressBarColor: Colors.red[500],
-          hideShadow: true,
-        ),
-        infoProperties: InfoProperties(
-          modifier: (value) {
-            return value.floor().toString();
-          },
-          mainLabelStyle: TextStyle(
-            color: Colors.white,
-            fontSize: 50.0,
-          ),
-          bottomLabelText: 'minutes',
-          bottomLabelStyle: TextStyle(
-            color: Colors.white60,
-          ),
-        ),
-      ),
-      onChange: (value) {
-        updateTime(value);
-      },
     );
   }
 }
