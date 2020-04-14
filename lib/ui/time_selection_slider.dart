@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro/constants.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 class TimeSelectionSlider extends StatelessWidget {
-  TimeSelectionSlider({this.valueChanged});
+  TimeSelectionSlider({this.valueChanged, this.isAnimating});
+  final bool isAnimating;
   final Function valueChanged;
 
   @override
   Widget build(BuildContext context) {
     return SleekCircularSlider(
-      min: 5,
-      max: 60,
-      initialValue: 25,
+      min: kMinimumSecondsSlider.toDouble(),
+      max: kMaximumSecondsSlider.toDouble(),
+      initialValue: kInitialValueSeconds.toDouble(),
       innerWidget: (value) {
         return null;
       },
       appearance: CircularSliderAppearance(
         size: 250.0,
+        spinnerMode: isAnimating,
         customColors: CustomSliderColors(
           trackColor: Colors.red[200],
           progressBarColor: Colors.red[500],
@@ -35,8 +38,8 @@ class TimeSelectionSlider extends StatelessWidget {
           ),
         ),
       ),
-      onChange: (value) {
-        valueChanged(value);
+      onChange: (minutes) {
+        valueChanged(minutes);
       },
     );
   }

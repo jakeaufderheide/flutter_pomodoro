@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/constants.dart';
-import 'package:flutter_pomodoro/time_selection_slider.dart';
+import 'package:flutter_pomodoro/logic/pomodoro_timer.dart';
+import 'package:flutter_pomodoro/ui/time_selection_slider.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
+
+import 'time_display.dart';
 
 void main() {
   runApp(MyApp());
@@ -31,13 +36,8 @@ class TimerPage extends StatefulWidget {
 }
 
 class _TimerPageState extends State<TimerPage> {
-  int currentTimeMinutes;
-  void updateTime(double time) {
-    setState(() {
-      currentTimeMinutes = time.floor().toInt();
-      print(currentTimeMinutes);
-    });
-  }
+  PomodoroTimer pomodoro = PomodoroTimer();
+  bool isCountdownActive = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,31 +53,41 @@ class _TimerPageState extends State<TimerPage> {
               alignment: AlignmentDirectional.center,
               children: [
                 TimeSelectionSlider(
-                  valueChanged: updateTime,
+                  valueChanged: (value) {
+                    setState(() {
+                      pomodoro.updateTime(value);
+                    });
+                  },
+                  isAnimating: false,
                 ),
-                Column(
-                  children: <Widget>[
-                    Text(
-                      currentTimeMinutes.toString(),
-                      style: kMinuteTextStyle,
-                    ),
-                    Text('minutes'),
-                  ],
-                ),
+                TimeDisplay(
+                    currentTimeSeconds: pomodoro.getCurrentTime(),
+                    isCountingDown: isCountdownActive),
               ],
             ),
             ButtonBar(
               alignment: MainAxisAlignment.center,
               children: [
                 RaisedButton(
-                  child: Icon(Icons.play_arrow),
-                  onPressed: () {
-                    print('button pressed');
-                  },
+                  child: isCountdownActive
+                      ? Icon(Icons.pause)
+                      : Icon(Icons.play_arrow),
+                  onPressed: isCountdownActive
+                      ? () {
+                          pauseTimer();
+                        }
+                      : () {
+                          activateTimer();
+                        },
                 ),
                 RaisedButton(
                   child: Icon(Icons.stop),
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      pauseTimer();
+                      pomodoro.reset();
+                    });
+                  },
                 ),
               ],
             ),
@@ -85,5 +95,12 @@ class _TimerPageState extends State<TimerPage> {
         ),
       ),
     );
+  }
+
+  void pauseTimer() {
+    setState(() {
+      isCountdownActive = false;
+      timer.cancel();
+    });
   }
 }
