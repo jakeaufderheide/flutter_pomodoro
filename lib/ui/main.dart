@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/constants.dart';
-import 'package:flutter_pomodoro/logic/pomodoro_timer.dart';
+import 'package:flutter_pomodoro/BLoC/pomodoro_bloc.dart';
+import 'package:flutter_pomodoro/logic/pomodoro_state.dart';
+import 'package:flutter_pomodoro/ui/about_page.dart';
 import 'package:flutter_pomodoro/ui/time_selection_slider.dart';
-import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 import 'time_display.dart';
 
@@ -36,71 +34,97 @@ class TimerPage extends StatefulWidget {
 }
 
 class _TimerPageState extends State<TimerPage> {
-  PomodoroTimer pomodoro = PomodoroTimer();
-  bool isCountdownActive = false;
+  TextEditingController test = TextEditingController();
+  int visibleTimeSeconds = 1;
+  @override
+  void initState() {
+//    pomodoroBloc.start();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    pomodoroBloc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Pomodoro'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return AboutPage();
+              }));
+            },
+          ),
+        ],
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              alignment: AlignmentDirectional.center,
+        child: StreamBuilder(
+          stream: pomodoroBloc.pomodoroStream,
+          builder: (context, snapshot) {
+            PomodoroState state = snapshot.data ??
+                PomodoroState(isActive: false, currentTimeSeconds: 0);
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TimeSelectionSlider(
-                  valueChanged: (value) {
-                    setState(() {
-                      pomodoro.updateTime(value);
-                    });
-                  },
-                  isAnimating: false,
+                Stack(
+                  alignment: AlignmentDirectional.center,
+                  children: [
+                    getTimeSelectionChild(state),
+                    TimeDisplay(
+                      currentTimeSeconds: state.currentTimeSeconds,
+                      isCountingDown: state.isActive,
+                    ),
+                  ],
                 ),
-                TimeDisplay(
-                    currentTimeSeconds: pomodoro.getCurrentTime(),
-                    isCountingDown: isCountdownActive),
-              ],
-            ),
-            ButtonBar(
-              alignment: MainAxisAlignment.center,
-              children: [
-                RaisedButton(
-                  child: isCountdownActive
-                      ? Icon(Icons.pause)
-                      : Icon(Icons.play_arrow),
-                  onPressed: isCountdownActive
-                      ? () {
-                          pauseTimer();
-                        }
-                      : () {
-                          activateTimer();
-                        },
-                ),
-                RaisedButton(
-                  child: Icon(Icons.stop),
-                  onPressed: () {
-                    setState(() {
-                      pauseTimer();
-                      pomodoro.reset();
-                    });
-                  },
+                ButtonBar(
+                  alignment: MainAxisAlignment.center,
+                  children: [
+                    RaisedButton(
+                      child: state.isActive
+                          ? Icon(Icons.pause)
+                          : Icon(Icons.play_arrow),
+                      onPressed: () {
+                        pomodoroBloc.toggle();
+                      },
+                    ),
+                    RaisedButton(
+                      child: Icon(Icons.stop),
+                      onPressed: () {
+                        pomodoroBloc.stop();
+                      },
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 
-  void pauseTimer() {
-    setState(() {
-      isCountdownActive = false;
-      timer.cancel();
-    });
+  getTimeSelectionChild(PomodoroState state) {
+    if (state.isActive) {
+      return TimeSelectionSlider(
+        key: Key("spinningSlider"),
+        valueChanged: (double value) {},
+        isAnimating: state.isActive,
+      );
+    } else {
+      return TimeSelectionSlider(
+        key: Key("editSlider"),
+        valueChanged: (double value) {
+          pomodoroBloc.updateTime(value.toInt());
+        },
+        isAnimating: state.isActive,
+      );
+    }
   }
 }

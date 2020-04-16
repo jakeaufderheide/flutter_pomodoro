@@ -3,7 +3,8 @@ import 'package:flutter_pomodoro/constants.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 class TimeSelectionSlider extends StatelessWidget {
-  TimeSelectionSlider({this.valueChanged, this.isAnimating});
+  TimeSelectionSlider({this.key, this.valueChanged, this.isAnimating});
+  final Key key;
   final bool isAnimating;
   final Function valueChanged;
 
@@ -19,15 +20,13 @@ class TimeSelectionSlider extends StatelessWidget {
       appearance: CircularSliderAppearance(
         size: 250.0,
         spinnerMode: isAnimating,
+        spinnerDuration: 5000,
         customColors: CustomSliderColors(
           trackColor: Colors.red[200],
           progressBarColor: Colors.red[500],
           hideShadow: true,
         ),
         infoProperties: InfoProperties(
-          modifier: (value) {
-            return value.floor().toString();
-          },
           mainLabelStyle: TextStyle(
             color: Colors.white,
             fontSize: 50.0,
@@ -38,8 +37,9 @@ class TimeSelectionSlider extends StatelessWidget {
           ),
         ),
       ),
-      onChange: (minutes) {
-        valueChanged(minutes);
+      onChange: (seconds) {
+        var secondsRoundedDownToNearestMinute = seconds - (seconds % 60);
+        valueChanged(secondsRoundedDownToNearestMinute);
       },
     );
   }

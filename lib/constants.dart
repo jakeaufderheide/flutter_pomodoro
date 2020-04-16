@@ -9,3 +9,11 @@ const kMinuteTextStyle = TextStyle(
   fontSize: 50.0,
   fontWeight: FontWeight.w900,
 );
+const kHeaderTextStyle = TextStyle(
+  fontSize: 32,
+  fontWeight: FontWeight.bold,
+);
+const kRegularTextStyle = TextStyle(
+  fontSize: 18,
+  fontWeight: FontWeight.normal,
+);
